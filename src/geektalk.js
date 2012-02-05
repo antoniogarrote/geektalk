@@ -306,6 +306,7 @@
 	    } else {
 		viewModel.projectNameStatus('success');
 		viewModel.projectNameInline('Success!');
+                jQuery("#stack-overflow-loader").show();
 
 		if(window.location.href.indexOf("#!") == -1) {
 		    window.location.href = "#!"+viewModel.projectName();
