@@ -30,6 +30,7 @@
     var geektalk = {};
     window.geektalk = geektalk;
 
+    var titleColors = ["#DC143C", "#00CD66", "#FFC125", "#FF9912", "#FF4500", "#7D9EC0"];
     var colors = [ "#B0171F", "#DC143C", "#CD8C95", "#8B5F65", "#8B475D", "#8B8386","#CD3278", "#8B2252", "#EE6AA7", "#DA70D6", "#8B4789", "#8B7B8B", "#8B668B", "#8B008B", "#4B0082", "#483D8B", "#0000FF", "#191970", "#3D59AB", "#4169E1", "#778899", "#1C86EE", "#4F94CD", "#607B8B", "#00C5CD", "#00868B", "#00CD66", "#008B45", "#2E8B57", "#00CD00", "#008000", "#66CD00", "#6E8B3D", "#9ACD32", "#CDCD00", "#8B8B00", "#FFA500", "#FF7F00", "#8B4500", "#FF7F24", "#FF8247", "#FF4500", "#EE5C42", "#EE2C2C", "#CD0000", "#8E388E", "#7171C6", "#388E8E"];
 
     // Constants
@@ -74,6 +75,16 @@
     
     // counter of StackOverflow users whose answers will be loaded
     geektalk.pendingStackOverflowUsers =  [];
+
+    // shows the about dialog
+    geektalk.viewModel.showAbout = function() {
+	jQuery('#about-modal').modal('show');
+    };
+
+    // hides the about dialog
+    geektalk.viewModel.hideAbout = function() {
+	jQuery('#about-modal').modal('hide');
+    };
 
     // A message to be shown in the status bar
     geektalk.viewModel.triplesLoadedMessage = ko.dependentObservable(function(){
@@ -135,6 +146,12 @@
     geektalk.viewModel.randomColor = function(selector) {
 	var randomNumber=Math.floor(Math.random()*colors.length);
 	return colors[randomNumber];
+    };
+
+    // generates a random color
+    geektalk.viewModel.randomTitleColor = function(selector) {
+	var randomNumber=Math.floor(Math.random()*titleColors.length);
+	return titleColors[randomNumber];
     };
 
     // small module that assigns colors to tags
@@ -303,7 +320,7 @@
 			geektalk.loadCollaborators();
 
 			// Start loading HackerNews Users
-			//geektalk.loadHackerNewsUsers();
+			geektalk.loadHackerNewsUsers();
 
 			// Start loading Twitter Users
 			geektalk.loadTwitterUsers();
@@ -560,16 +577,15 @@
 		data['text'] = data['status']['text'];
 		data['created_at'] = data['status']['created_at'];
 
-		matches = (data['text']].match(/@[\a-zA-Z0-9]+/g)||[]);
+		var matches = (data['text'].match(/@[\a-zA-Z0-9]+/g)||[]);
 		for(var i=0; i<matches.length; i++) {
-		    match = matches[i];
-		    txt = data['text'].replace(match,"<span class='tweet-ref'>"+match+"</span>");
+		    var match = matches[i];
+		    var txt = data['text'].replace(match,"<span class='tweet-ref'>"+match+"</span>");
 		}
 
 
 		var userExtra = {'@id': 'http://geektalk.com/vocabulary/geek#'+login,
 				 'http://api.twitter.com/1/vocabulary#followers': data['followers_count'] };
-		debugger;
 		sko.store.load("application/json",userExtra, function(){
 		    geektalk.resolveAndLoad(uri, data, function(success, jsonld) {
 			cb();

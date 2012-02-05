@@ -24,22 +24,34 @@
           src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
   <script type="text/javascript" src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.5&sensor=false&key=AIzaSyBq0ZLwH9iboc4wGQoL6UomN1Dd19slM5M"></script>
-  <script type='text/javascript' src='./js/d3.js'></script>
-  <script type="text/javascript" src="https://raw.github.com/antoniogarrote/rdfstore-js/master/dist/browser/rdf_store_min.js"></script>
-  <script type="text/javascript" src="./js/semko.js"></script>
 
+  <!-- development scripts -->
   <!--
-  <script type="text/javascript" src="./js/rdf_store.js"></script>
-  <script type="text/javascript" src="https://raw.github.com/antoniogarrote/semantic-ko/semantic/dist/semko-debug.js"></script>
-   -->
+  <script type="text/javascript" src="./src/d3.js"></script>
+  <script type="text/javascript" src="./src/rdf_store.js"></script>
+  <script type="text/javascript" src="./src/semko.js"></script>
+  <script type="text/javascript" src="./src/bootstrap-modal.js"></script>
 
-  <script type="text/javascript" src="./js/rdfstore_frontend.js"></script>
-  <script type="text/javascript" src="./js/macro.js"></script>
-  <script type="text/javascript" src="./js/apis.js"></script>
-  <script type="text/javascript" src="./js/geektalk.js"></script>
+
+  <script type="text/javascript" src="https://raw.github.com/antoniogarrote/rdfstore-js/master/dist/browser/rdf_store_min.js"></script>
+  <script type="text/javascript" src="https://raw.github.com/antoniogarrote/semantic-ko/semantic/dist/semko-debug.js"></script>
+
+
+  <script type="text/javascript" src="./src/rdfstore_frontend.js"></script>
+  <script type="text/javascript" src="./src/macro.js"></script>
+  <script type="text/javascript" src="./src/apis.js"></script>
+  <script type="text/javascript" src="./src/geektalk.js"></script>
+  -->
+  <!-- production scripts -->
+  <script type="text/javascript" src="./js/geektalk.dist.js"></script>
 </head>
 
 <body>
+<!-- github badge -->
+<a target="_blank" href="https://github.com/antoniogarrote/geektalk" data-bind="visible: appStatus()=='project-selection'">
+  <img src="./images/forkme.png" style="z-index:1020;position:absolute;top:0;right:0;border:0;" width="149", height="149" alt="Fork me on Github"></img>
+</a>
+
 <!-- RDFStore frontend -->
 <div id="frontend-overlay"></div>
 <div id="frontend" style="position: absolute; width:95%; top:0; left:2%"></div>
@@ -48,7 +60,40 @@
 <div class="container">
 
 <div id="title-header" class="page-header">
-  <h1 data-bind="style: {color: randomColor()}">Geek Talk</h1>
+  <div class="row">
+    <span class="span7">
+      <a id="title-link-back" href="./index.html"><h1 data-bind="style: {color: randomTitleColor()}">Geek Talk</h1></a>
+    </span>
+    <div class="span5 header-options">
+      <i class="icon-home" data-bind="visible: appStatus()!='project-selection'"></i>
+      <a href="./index.html" data-bind="visible: appStatus()!='project-selection'">change project</a>
+      <span class="separator" data-bind="visible: appStatus()!='project-selection', text: '|'"></span>
+      <i class="icon-question-sign"></i>
+      <a href="#" data-bind="click: showAbout">about</a>
+    </div>
+  </div>
+</div>
+
+<div id="about-modal" class="modal hide fade">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal" data-bind="click: hideAbout">&times;</a>
+    <h3>About Geektalk</h3>
+  </div>
+  <div class="modal-body">
+    <p>A sample application showing the use of RDF as the data layer for JS applications</p>
+    <p>Geektalk has been built using some libraries for RDF/JS integration developed at the <a target="_blank" href="http://www.usal.es/webusal/node/53">Universidad de Salamanca</a>.</p>
+    <p>These libraries ara available as free software on Github:</p>
+    <ul>
+      <li><a target="_blank" href="https://github.com/antoniogarrote/rdfstore-js">RDFStore-JS</a></li>
+      <li><a target="_blank" href="https://github.com/antoniogarrote/semantic-ko">SemanticKO</a></li>
+      <li><a target="_blank" href="https://github.com/antoniogarrote/json-ld-macros">JSON-LD Macros</a></li>
+    </ul>
+    <br/>
+    <p>If you would like to report an error or send me any questions, you can find me at &lt;antoniogarrote@gmail.com&gt; or @antoniogarrote at Twitter</p>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn" data-dismiss="modal" >Close</a>
+  </div>
 </div>
 
 <section id="project-selection"
@@ -143,7 +188,22 @@
 
 
 <!-- Main body of the application -->
-<section id="answers-display" class="section-display" data-bind="template: 'question-template'"></section>
+<section id="answers-display" class="section-display">
+  <!-- selection criterias -->
+  <div class="row selected-criterias" data-bind="visible: StackOverflowSelectionCriteria()!=='all'">
+    <div class="span12">
+      <a class="close close-selection" href="#" data-bind="click: unselectTag ">&times;</a>
+            <span class="tag"
+                  data-bind="text: StackOverflowSelectionCriteria, style: {'background-color': colorForTag(StackOverflowSelectionCriteria()) }"></span>
+    </div>
+  </div>
+  <span data-bind="template: 'question-template'"></span>
+  <div id="stack-overflow-loader" class="section-loader">
+    <div class="progress progress-info progress-striped">
+      <div class="bar"></div>
+    </div>
+  </div>
+</section>
 <section id="discussions-display" class="section-display" data-bind="template: 'discussion-template'"
          style="display:none"></section>
 <section id="status-display" class="section-display" data-bind="template: 'status-template'"
@@ -163,6 +223,7 @@
         </div>
         <div style="text-align:right" class="span6">
           <b>(showing <span data-bind="text:triplesInVisualization"></span> triples)</b>
+	  <i class="icon-refresh"></i>
           <a href="#" data-bind="click: queryVisualization">update</a>
         </div>
       </div>
@@ -182,6 +243,7 @@
           <h3>Reputation Map</h3>
         </div>
         <div style="text-align:right" class="span6">
+	  <i class="icon-refresh"></i>
           <a href="#" data-bind="click: queryVisualization">update</a>
         </div>
       </div>
@@ -201,6 +263,7 @@
           <h3>Popular Tags</h3>
         </div>
         <div style="text-align:right" class="span6">
+	  <i class="icon-refresh"></i>
           <a href="#" data-bind="click: queryVisualization">update</a>
         </div>
       </div>
@@ -220,6 +283,7 @@
           <h3>Tags Treemap</h3>
         </div>
         <div style="text-align:right" class="span6">
+	  <i class="icon-refresh"></i>
           <a href="#" data-bind="click: queryVisualization">update</a>
         </div>
       </div>
@@ -407,15 +471,6 @@
 
 <!-- Template for Stack Overflow questions -->
 <script id="question-template" type="text/html">
-  <!-- selection criterias -->
-  <div class="row selected-criterias" data-bind="visible: StackOverflowSelectionCriteria()!=='all'">
-    <div class="span12">
-      <a class="close close-selection" href="#" data-bind="click: unselectTag ">&times;</a>
-            <span class="tag"
-                  data-bind="text: StackOverflowSelectionCriteria, style: {'background-color': colorForTag(StackOverflowSelectionCriteria()) }"></span>
-    </div>
-  </div>
-
   {{each StackOverflowSelectedQuestions}}
       <span class="question-answer-container" about="${$value}">
         <!-- the Question -->
@@ -463,11 +518,6 @@
         </div>
       </span>
   {{/each}}
-  <div id="stack-overflow-loader" class="section-loader">
-    <div class="progress progress-info progress-striped">
-      <div class="bar"></div>
-    </div>
-  </div>
 </script>
 
 <script id="tags-template" type="text/html">

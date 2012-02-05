@@ -174,7 +174,8 @@
 }
 
 #rdf-store-menu-load-dialog {
-    font-size: 12px
+    font-size: 12px;
+    position: fixed
 }
 #rdf-store-menu-load-dialog span {
     padding-top:3px

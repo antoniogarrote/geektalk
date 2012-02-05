@@ -8,7 +8,21 @@
     padding-top: 5px;
     background: white;
     width: 940px;
-    z-index: 100
+    z-index: 100;
+    border-bottom: 1px solid #DDD
+}
+
+#title-header a#title-link-back:hover {
+    text-decoration: none
+}
+
+#title-header .header-options {
+    text-align: right;
+    margin-top: 12px
+}
+
+#title-header .separator {
+    color: lightgray
 }
 
 #project-selection {

@@ -292,7 +292,7 @@
             html = html + "<div class='rdfstore-options-row-item' id='rdf-store-dialog-browse-store' data-bind='click: storeUri'>load</div>";
             html = html + "</div>";
             html = html + "<div class='rdfstore-dialog-actions'>";
-            html = html + "<input type='submit' value='cancel' style='float:none; min-width:100px' data-bind='click:closeDialog'></input>";
+            html = html + "<input class=\"btn\" type='submit' value='cancel' style='float:none; min-width:100px' data-bind='click:closeDialog'></input>";
             html = html + "</div>";
             html = html + "</div>";
      
@@ -334,7 +334,7 @@
             html = html + "<div class='rdfstore-dialog-row'><span>Language:</span><input id='rdf-store-show-literal-language' type='text' value='"+lang+"'></input></div>";
             html = html + "<div class='rdfstore-dialog-row'><span>Value:</span><textarea id='rdf-store-show-literal-value' type='text'>"+value+"</textarea></div>";
             html = html + "<div class='rdfstore-dialog-actions' id='rdfstore-dialog-actions-show-literal'>";
-            html = html + "<input type='submit' value='cancel' style='float:none; min-width:100px' data-bind='click:closeDialog'></input>";
+            html = html + "<input class='btn' type='submit' value='cancel' style='float:none; min-width:100px' data-bind='click:closeDialog'></input>";
             html = html + "</div>";
             html = html + "</div>";
      
@@ -381,8 +381,8 @@
             }
             html = html + "<div class='rdfstore-dialog-row'><span>Store graph URI:</span><input id='rdf-store-graph-to-store' type='text'></input></div>";
             html = html + "<div class='rdfstore-dialog-actions'>";
-            html = html + "<input type='submit' id='rdfstore-dialog-load-submit-btn' value='load' style='float:none; min-width:100px' data-bind='click:loadRemoteResource'></input>";
-            html = html + "<input type='submit' value='cancel' style='float:none; min-width:100px' data-bind='click:closeDialog'></input>";
+            html = html + "<input class='btn' type='submit' id='rdfstore-dialog-load-submit-btn' value='load' style='float:none; min-width:100px' data-bind='click:loadRemoteResource'></input>";
+            html = html + "<input class='btn' type='submit' value='cancel' style='float:none; min-width:100px' data-bind='click:closeDialog'></input>";
             html = html + "</div>";
             html = html + "</div>";
 
@@ -430,7 +430,7 @@
                                     alert("Error loading graph: "+quads);                                     
                                 }
                             });
-        },
+        }
 
     };
     
