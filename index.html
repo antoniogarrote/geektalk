@@ -1,0 +1,498 @@
+<!doctype html>
+
+<!--[if lt IE 7 ]>
+<html class="no-js ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]>
+<html class="no-js ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Geek Talk</title>
+  <meta name="author" content="Antonio Garrote">
+
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <link rel="stylesheet" href="./css/rdfstore_frontend.css">
+  <link rel="stylesheet" href="./css/geektalk.css">
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript"
+          src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.5&sensor=false&key=AIzaSyBq0ZLwH9iboc4wGQoL6UomN1Dd19slM5M"></script>
+  <script type='text/javascript' src='./js/d3.js'></script>
+  <script type="text/javascript" src="https://raw.github.com/antoniogarrote/rdfstore-js/master/dist/browser/rdf_store_min.js"></script>
+  <script type="text/javascript" src="./js/semko.js"></script>
+
+  <!--
+  <script type="text/javascript" src="./js/rdf_store.js"></script>
+  <script type="text/javascript" src="https://raw.github.com/antoniogarrote/semantic-ko/semantic/dist/semko-debug.js"></script>
+   -->
+
+  <script type="text/javascript" src="./js/rdfstore_frontend.js"></script>
+  <script type="text/javascript" src="./js/macro.js"></script>
+  <script type="text/javascript" src="./js/apis.js"></script>
+  <script type="text/javascript" src="./js/geektalk.js"></script>
+</head>
+
+<body>
+<!-- RDFStore frontend -->
+<div id="frontend-overlay"></div>
+<div id="frontend" style="position: absolute; width:95%; top:0; left:2%"></div>
+
+<!-- holder for the frontend -->
+<div class="container">
+
+<div id="title-header" class="page-header">
+  <h1 data-bind="style: {color: randomColor()}">Geek Talk</h1>
+</div>
+
+<section id="project-selection"
+         style="display:none"
+         data-bind="visible: appStatus()=='project-selection'">
+  <form class="form-search">
+    <h3>Choose a Github's User and Project</h3>
+
+    <div id="project-name-container"
+         data-bind="css: {error: projectNameStatus()=='error',
+                              success: projectNameStatus()=='success'}">
+                  <span class="control-group" data-bind="css: {error: projectNameStatus()=='error',
+                                                         success: projectNameStatus()=='success'}">
+                    <input id="project-name" class="xlarge" type="text"
+                           placeholder="user/project"
+                           data-bind="value: projectName">
+                    </input>
+                  </span>
+      <img id="project-name-spinner" src="./images/spinner.gif"
+           data-bind="visible: projectNameStatus()=='loading'">
+      </img>
+      <button type="submit" class="btn btn-primary"
+              data-bind="click: loadProjectName">
+        load
+      </button>
+    </div>
+    <span class="control-group" data-bind="css: {error: projectNameStatus()=='error',
+                                                 success: projectNameStatus()=='success'}">
+      <span id="project-name-inline" class="help-inline"
+            data-bind="text: projectNameInline, visible: projectNameInline!=null">
+      </span>
+    </span>
+  </form>
+</section>
+
+<section id="project-description"
+         data-bind="visible: appStatus()=='conversations-playing'">
+  <div class="row" about="currentProjectURI">
+    <div class="span6">
+      <div class="row">
+        <div class="project-header-name">
+          <h2 data-bind="text: [gh:name]"></h2>
+        </div>
+        <div class="avatared" rel="[gh:owner]">
+          <h3>
+            <img data-bind="attr:{ src: [foaf:depiction] }"/>
+            <span data-bind="text: [gh:login]"></span>
+          </h3>
+        </div>
+      </div>
+    </div>
+    <div class="span6">
+      <div class="project-header-counter">
+        <span class="project-header-counter-num" data-bind="text: projectResourcesFound"></span>
+
+        <div class="project-header-counter-sub">Resources</div>
+      </div>
+      <div class="project-header-counter">
+        <span class="project-header-counter-num" data-bind="text: projectContributorsFound"></span>
+
+        <div class="project-header-counter-sub">Contributors</div>
+      </div>
+      <div class="project-header-counter">
+        <span class="project-header-counter-num" data-bind="text:[gh:forks]"></span>
+
+        <div class="project-header-counter-sub">Forks</div>
+      </div>
+      <div class="project-header-counter">
+        <span class="project-header-counter-num" data-bind="text:[gh:watchers]"></span>
+
+        <div class="project-header-counter-sub">Watchers</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tabs -->
+<div class="row" id="section-tabs" data-bind="visible: appStatus()=='conversations-playing'">
+    <span class='span12'>
+      <ul class="nav nav-tabs">
+        <li id="sotab" class="active" data-bind="click: function(){ selectSection('StackOverflow') }">
+          <a href="#">Q & A</a>
+        </li>
+        <li id="hntab" data-bind="click: function(){ selectSection('HackerNews') }"><a href="#">Discussions</a></li>
+        <li id="twtab" data-bind="click: function(){ selectSection('Twitter') }"><a href="#">Statuses</a></li>
+        <li id="pptab" data-bind="click: function(){ selectSection('People') }"><a href="#">People</a></li>
+        <li id="geotab" data-bind="click: function(){ selectSection('Location') }"><a href="#">Location</a></li>
+        <li id="stats" data-bind="click: function(){ selectSection('Stats') }"><a href="#">Stats & Visualisations</a></li>
+      </ul>
+    </span>
+</div>
+
+
+<!-- Main body of the application -->
+<section id="answers-display" class="section-display" data-bind="template: 'question-template'"></section>
+<section id="discussions-display" class="section-display" data-bind="template: 'discussion-template'"
+         style="display:none"></section>
+<section id="status-display" class="section-display" data-bind="template: 'status-template'"
+         style="display:none"></section>
+<section id="people-display" class="section-display" data-bind="template: 'people-template'"
+         style="display:none"></section>
+<section id="location-display" class="section-display" style="display:none">
+  <div id="map_canvas" class="map-canvas"></div>
+</section>
+<section id="stats-display" class="section-display" style="display:none">
+  <!-- RDF graph -->
+  <div id="rdf-graph-chart-row" class="row">
+    <div class="span12">
+      <div class="row chart-title">
+        <div class="left-chart-title span6">
+          <h3>RDF Graph</h3>
+        </div>
+        <div style="text-align:right" class="span6">
+          <b>(showing <span data-bind="text:triplesInVisualization"></span> triples)</b>
+          <a href="#" data-bind="click: queryVisualization">update</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span12">
+          <div id="graph-chart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reputation chart -->
+  <div id="reputation-chart-row" class="row">
+    <div class="span12">
+      <div class="row chart-title">
+        <div class="span6 left-chart-title">
+          <h3>Reputation Map</h3>
+        </div>
+        <div style="text-align:right" class="span6">
+          <a href="#" data-bind="click: queryVisualization">update</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span12">
+          <div id="reputation-chart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tags graph -->
+  <div id="tags-graph-chart-row" class="row">
+    <div class="span12">
+      <div class="row chart-title">
+        <div class="span6 left-chart-title">
+          <h3>Popular Tags</h3>
+        </div>
+        <div style="text-align:right" class="span6">
+          <a href="#" data-bind="click: queryVisualization">update</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span12">
+          <div id="tags-chart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tags treegraph -->
+  <div id="tags-tree-map-row" class="row">
+    <div class="span12">
+      <div class="row chart-title">
+        <div class="span6 left-chart-title">
+          <h3>Tags Treemap</h3>
+        </div>
+        <div style="text-align:right" class="span6">
+          <a href="#" data-bind="click: queryVisualization">update</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span12">
+          <div id="tags-tree-map"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- Template for People -->
+<script id="people-template" type="text/html">
+  {{each sko.where("{ ?subject a foaf:Person . ?subject gh:followers ?f } order by desc(?f) limit 20")()}}
+  <div class="person-container" about="${$value}"
+       data-bind="visible: sko.current().tryProperty('[gh:public_repos]')()!=null">
+    <div class="row">
+      <div class="span6 person-name-picture">
+        <h3 data-bind="text: [gh:login]"></h3>
+      </div>
+      <div class="span6 person-badges">
+        <div class="person-badge">
+          <div class="person-badge-counter" data-bind="text: [gh:public_repos]"></div>
+          <div class="person-badge-text">
+            <img src="./images/gh.png"/>
+            Repos
+          </div>
+        </div>
+        <div class="person-badge">
+          <div class="person-badge-counter" data-bind="text: [gh:followers]"></div>
+          <div class="person-badge-text">
+            <img src="./images/gh.png"/>
+            Followers
+          </div>
+        </div>
+        <div class="person-badge" data-bind="visible: sko.current().tryProperty('[tw:followers]')()!=null">
+          <div class="person-badge-counter" data-bind="text: [tw:followers]">?</div>
+          <div class="person-badge-text">
+            <img src="./images/twitter.png"/>
+            Followers
+          </div>
+        </div>
+        <div class="person-badge" data-bind="visible: sko.current().tryProperty('[so:reputation]')()!=null">
+          <div class="person-badge-counter" data-bind="text: [so:reputation]">?</div>
+          <div class="person-badge-text">
+            <img src="./images/so.png"/>
+            Reputation
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="span2 person-picture">
+        <img data-bind="attr: {src: [foaf:depiction]}"/>
+      </div>
+      <table class="table-striped table-bordered table-condensed span10">
+        <tbody>
+        <tr>
+          <td class='people-table-lable'>Name:</td>
+          <td data-bind="text: [foaf:name]"></td>
+        </tr>
+        <tr>
+          <td class='people-table-lable'>Email:</td>
+          <td data-bind="text: [gh:email]"></td>
+        </tr>
+        <tr>
+          <td class='people-table-lable'>Company:</td>
+          <td data-bind="text: [gh:company]"></td>
+        </tr>
+        <tr>
+          <td class='people-table-lable'>Blog:</td>
+          <td><a href="#" target="_blank" data-bind="text: [gh:blog], attr:{href: [gh:blog]}"></a></td>
+        </tr>
+        <tr>
+          <td class='people-table-lable'>Location:</td>
+          <td data-bind="text: [gh:location]"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {{/each}}
+</script>
+
+<!-- Template for Twitter questions -->
+<script id="status-template" type="text/html">
+  {{each sko.where("{ ?subject a tw:MicroblogPost }")()}}
+      <span class="question-answer-container" about="${$value}">
+        <!-- the Question -->
+        <div class="row question-container">
+          <div class="span12">
+            <div class="row question-title-tags">
+              <span class="span7">
+		<b data-bind="text: sko.current().displayDate()"></b>
+              </span>
+              <span class="span5 badges-container">
+		<a class="source-badge" style="bottom: 0px" target="_blank"
+		   data-bind="attr: {href: sko.current().tryProperty('[tw:statusUrl]')}">
+		  <img src="./images/twitter.png"/>
+		</a>
+		<div class="question-tags">&nbsp;</div>
+              </span>
+            </div>
+          </div>
+        </div>
+        <!-- the Answer -->
+        <div class="row answer-container">
+          <div class="span12 inner-answer-container" style="margin-left: 0px">
+            <div class="row answer-body">
+              <span class="span9 offset1" data-bind="html: [tw:text]"></span>
+            </div>
+            <div class="span12 answer-sub" rel="[tw:owner]">
+              <img class="mini-avatar" data-bind="attr: {src: [foaf:depiction]}"/>
+              <span data-bind="text: [gh:login]"></span>
+            </div>
+          </div>
+        </div>
+      </span>
+  {{/each}}
+</script>
+
+
+<!-- Template for Hacker News questions -->
+<script id="discussion-template" type="text/html">
+  {{each sko.where("{ ?subject a hn:Answer }")()}}
+      <span class="question-answer-container" about="${$value}">
+        <!-- the Question -->
+        <div class="row question-container" rel="[hn:post]">
+          <div class="span12">
+            <div class="row question-title-tags">
+              <span class="span7">
+		<h4 class="question-title" data-bind="html: [hn:title]"></h4>
+              </span>
+              <span class="span5 badges-container">
+		<a class="source-badge" style="bottom: 0px" target="_blank"
+		   data-bind="attr: {href: 'http://news.ycombinator.com/item?id='+sko.current().tryProperty('[hn:id]')()}">
+		  <img src="./images/y.gif"/>
+		</a>
+		<div class="question-tags">&nbsp;</div>
+              </span>
+            </div>
+            <div class="row question-body" style="display:none">
+              <span class="span9 offset1" data-bind="html: [hn:text]"></span>
+            </div>
+          </div>
+        </div>
+        <!-- the Answer -->
+        <div class="row answer-container">
+          <input class="question-id-marker" type="hidden" data-bind="value: [hn:id]"/>
+
+          <div class="span12 inner-answer-container" style="margin-left: 0px">
+            <div class="row answer-body"
+                 data-bind="visible: viewModel['open'+(sko.current().tryProperty('[hn:id]')())]">
+              <span class="span9 offset1" data-bind="html: [hn:comment]"></span>
+            </div>
+            <div class="span12 answer-sub">
+              <span data-bind="template: {name:'owners-template', foreach:[hn:owner]}"> </span>
+          <span class="answer-actions">
+            <span data-bind="visible: !(viewModel['open'+(sko.current().tryProperty('[hn:id]')())]())">
+	      <i class="icon-eye-open"></i>
+              <a class="show-link" href="#"
+                 data-bind="click: function(e){ geektalk.viewModel.modifyPermanentQuestionState(e); }">show</a>
+            </span>
+            <span data-bind="visible: viewModel['open'+(sko.current().tryProperty('[hn:id]')())]">
+	      <i class="icon-eye-close"></i>
+              <a class="show-link" href="#"
+                 data-bind="click: function(e){ geektalk.viewModel.modifyPermanentQuestionState(e); }">hide</a>
+            </span>
+          </span>
+            </div>
+          </div>
+        </div>
+      </span>
+  {{/each}}
+</script>
+
+<script id="owners-template" type="text/html">
+      <span about="${$value}">
+        <img class="mini-avatar" data-bind="attr: {src: [foaf:depiction]}"/>
+        <span data-bind="text: [gh:login]"></span>
+      </span>
+</script>
+
+<!-- Template for Stack Overflow questions -->
+<script id="question-template" type="text/html">
+  <!-- selection criterias -->
+  <div class="row selected-criterias" data-bind="visible: StackOverflowSelectionCriteria()!=='all'">
+    <div class="span12">
+      <a class="close close-selection" href="#" data-bind="click: unselectTag ">&times;</a>
+            <span class="tag"
+                  data-bind="text: StackOverflowSelectionCriteria, style: {'background-color': colorForTag(StackOverflowSelectionCriteria()) }"></span>
+    </div>
+  </div>
+
+  {{each StackOverflowSelectedQuestions}}
+      <span class="question-answer-container" about="${$value}">
+        <!-- the Question -->
+        <div class="row question-container" rel="[so:question]">
+          <div class="span12">
+            <div class="row question-title-tags">
+          <span class="span7">
+            <h4 class="question-title" data-bind="html: [so:title]"></h4>
+          </span>
+          <span class="span5 badges-container">
+            <a class="source-badge" target="_blank"
+               data-bind="attr: {href: 'http://stackoverflow.com/questions/'+sko.current().tryProperty('[so:question_id]')()}">
+              <img src="./images/so.png"/>
+            </a>
+            <div class="question-tags span6" data-bind="template: {name:'tags-template', foreach: [so:tags] }"></div>
+          </span>
+            </div>
+            <div class="row question-body" style="display:none">
+              <span class="span9 offset1" data-bind="html: [so:body]"></span>
+            </div>
+          </div>
+        </div>
+        <!-- the Answer -->
+        <div class="row answer-container">
+          <div class="span12 inner-answer-container" style="margin-left: 0px">
+            <div class="row answer-body" style="display:none">
+              <span class="span9 offset1" data-bind="html: [so:body]"></span>
+            </div>
+            <div class="span12 answer-sub" rel="[so:owner]">
+              <img class="mini-avatar" data-bind="attr: {src: [foaf:depiction]}"/>
+              <span data-bind="text: [so:display_name]"></span>
+          <span class="answer-actions">
+	    <span style="display: none">
+	      <i class="icon-eye-close"></i>
+              <a class="hide-link" href="#"
+		 data-bind="click: function(e){ geektalk.viewModel.modifyQuestionState(e); }">hide</a>
+	    </span>
+	    <span>
+	      <i class="icon-eye-open"></i>
+              <a class="show-link" href="#" data-bind="click: function(e){ geektalk.viewModel.modifyQuestionState(e); }">show</a>
+	    </span>
+          </span>
+            </div>
+          </div>
+        </div>
+      </span>
+  {{/each}}
+  <div id="stack-overflow-loader" class="section-loader">
+    <div class="progress progress-info progress-striped">
+      <div class="bar"></div>
+    </div>
+  </div>
+</script>
+
+<script id="tags-template" type="text/html">
+  <a href="#" style="margin-left: 3px" class="tag"
+     data-bind="style: {'background-color': colorForTag($value) }, click: selectTag ">${$value}</a>
+</script>
+
+
+<!-- status bar at the bottom of the page -->
+<section id="status-info"
+         data-bind="visible: appStatus()!='project-selection'">
+  <div class="row">
+    <div class="span10">
+      <div id="resourceBeingLoadedText" data-bind="text:uriBeingLoadedMessage">
+      </div>
+      <img id="uri-loaded-spinner" src="./images/spinner.gif"
+           data-bind="visible: uriBeingLoaded()!==''">
+      </img>
+    </div>
+    <div id='triples-counter' class="span2">
+      <a href="#" data-bind="text: triplesLoadedMessage, click: showFrontend"></a>
+    </div>
+  </div>
+</section>
+</div>
+</body>
+
+</html>
