@@ -60,6 +60,7 @@
 	StackOverflowSelectionCriteria: ko.observable('all'),
 	StackOverflowAllQuestions: ko.observable([]),
 	StackOverflowSelectedQuestions: ko.observable([]),
+	HackerNewsRequests: ko.observable(0),
 	currentProjectCollaboratorsPage: ko.observable(0),
 	pendingCollaborators: ko.observable(),
 	loadedCollaborators: 0,
@@ -307,6 +308,7 @@
 		viewModel.projectNameStatus('success');
 		viewModel.projectNameInline('Success!');
                 jQuery("#stack-overflow-loader").show();
+                jQuery("#hacker-news-loader").show();
 
 		if(window.location.href.indexOf("#!") == -1) {
 		    window.location.href = "#!"+viewModel.projectName();
@@ -614,6 +616,20 @@
     // Loads threads for this user from Hacker News
     geektalk.loadHackerNewsThreads = function(login, cb) {
 	var uri = "http://api.ihackernews.com/threads/"+login+"?format=jsonp";
+	var currentHNRequests = viewModel.HackerNewsRequests();
+	if(currentHNRequests != null) {
+	    if(currentHNRequests == 0) {
+	        currentHNRequests = currentHNRequests+5;
+	    } else if(currentHNRequests > 99) {
+		jQuery("#hacker-news-loader-alert").show();
+	        currentHNRequests = 5;	    
+	    } else {
+	        currentHNRequests = currentHNRequests+5;
+	    }
+	    jQuery("#hacker-news-loader .progress .bar").attr("style","width: "+currentHNRequests+"%");
+	    viewModel.HackerNewsRequests(currentHNRequests);
+	}
+
 	geektalk.loadJSONP(uri, function(jsonpData) {
 	    var comments = jsonpData.comments;
 	    if(comments.length > 0) {
@@ -629,9 +645,25 @@
 		    var comment = comments[i];
 		    comment.owner = login;
 
+	            var currentHNRequests = viewModel.HackerNewsRequests();
+		    if(currentHNRequests!=null) {
+			if(currentHNRequests == 0) {
+	                    currentHNRequests = currentHNRequests+5;
+			} else if(currentHNRequests > 99) {
+			    jQuery("#hacker-news-loader-alert").show();
+	                    currentHNRequests = 5;	    
+			} else {
+	                    currentHNRequests = currentHNRequests+5;
+			}
+			jQuery("#hacker-news-loader .progress .bar").attr("style","width: "+currentHNRequests+"%");
+			viewModel.HackerNewsRequests(currentHNRequests);
+		    }
+
 		    var uriPost = "http://api.ihackernews.com/post/"+comment.postId+"?format=jsonp";
 		    setTimeout(function() {
 			geektalk.loadJSONP(uriPost, function(jsonpData) {
+            	            viewModel.HackerNewsRequests(null);		         
+			    jQuery("#hacker-news-loader").hide();
 			    geektalk.resolveAndLoad(uriPost, jsonpData, function(success, jsonld) {				
 				viewModel['open'+comment['id']] = ko.observable(false);
 				geektalk.resolveAndLoad(uri, comment, function(success, jsonld) {

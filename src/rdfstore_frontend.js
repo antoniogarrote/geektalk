@@ -129,7 +129,7 @@
                     if(redirection == 0) {
                         callback(false, 500);
                     } else {
-                        var location = (xhr.getAllResponseHeaders()["Location"] || xhr.getAllResponseHeaders()["location"])
+                        var location = (xhr.getAllResponseHeaders()["Location"] || xhr.getAllResponseHeaders()["location"]);
                         if(location != null) {
                             NetworkTransport.load(location, accept, callback, (redirection -1));
                         } else {
@@ -144,7 +144,7 @@
     };
 
     jQuery.fn.center = function () {
-        this.css("position","absolute");
+        this.css("position","fixed");
 
         var bounds = jQuery("#rdfstore-frontend").position();
         var height = jQuery("#rdfstore-frontend").height();
