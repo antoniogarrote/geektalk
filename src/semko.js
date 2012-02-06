@@ -642,11 +642,7 @@ ko.memoization = (function () {
 
                             if (node.parentNode)
 				node.parentNode.removeChild(node); // If possible, erase it totally (not always possible - someone else might just hold a reference to it then call unmemoizeDomNodeAndDescendants again)
-                        }catch(e) {
-                            console.log("error memoid ...");
-			    console.log(e.message);
-			    console.log(e.stack)
-                        }
+                        }catch(e) {}
                     });
                 });
             }
@@ -1389,10 +1385,7 @@ ko.exportSymbol('ko.jsonExpressionRewriting.insertPropertyReaderWritersIntoJson'
                 if(typeof(bindings) == 'function') {
                     viewModel['skonode'] = node;
                     bindingsToBeEvaluated = bindings;
-		    try {
-		        with(viewModel){ evaluatedBindings =  bindingsToBeEvaluated() };	
-		    } catch (x) {
-		    }
+                    with(viewModel){ evaluatedBindings =  bindingsToBeEvaluated() };
                 } else {
                     evaluatedBindings = bindings;
                 }
@@ -2465,9 +2458,13 @@ sko.activeDebug = false;
 
 sko.log = function(msg) {
     if(sko.activeDebug) {
-        console.log(msg);
+        if(typeof(console) != 'undefined' && console.log)
+            console.log(msg);
     }
 };
+
+// Added a version identifier
+sko.VERSION = "0.1.0";
 
 /**
  * JSON-LD utilities
@@ -2570,7 +2567,7 @@ sko.jsonld = {
                 } else {
                     node[property] = object;
                     if(property[0] != '@') {
-                        if(isCURIE == true) {
+                        if(isCURIE) {
                             // saving prefix
                             var prefix = property.split(":")[0];
                             node["@context"][prefix] = rdf.prefixes[prefix];
@@ -2733,11 +2730,11 @@ sko.registerPrefix = function(prefix, uri) {
 
 // blank IDs counter
 sko._blankCounter = 0;
-sko.nextBlankLabel = function(){
-    var blankLabel = "_:sko_"+sko._blankCounter;
+sko.nextBlankLabel = function () {
+    var blankLabel = "_:sko_" + sko._blankCounter;
     sko._blankCounter++;
     return blankLabel;
-}
+};
 
 // Collection of observable resources
 sko.aboutResourceMap = {};
@@ -3104,7 +3101,7 @@ sko.plainUri = function(uri) {
         return uri.slice(1,uri.length-1);
     } else if(uri.match(/\[[^,;"\]\}\{\[\.:]+:[^,;"\}\]\{\[\.:]+\]/) != null) {
         uri = uri.slice(1, uri.length-1);
-        resolved = sko.rdf.prefixes.resolve(uri);
+        var resolved = sko.rdf.prefixes.resolve(uri);
         if(resolved == null) {
             throw("The CURIE "+uri+" cannot be resolved");
         } else {
@@ -3162,7 +3159,7 @@ sko.Resource = function(resourceId, subject, node) {
     // classes this object is instance of
     this.classes = {};
 
-    var that = this
+    var that = this;
     
     // default language for literals
     this.defaultLanguage = ko.dependentObservable(function(){
@@ -3178,7 +3175,7 @@ sko.Resource = function(resourceId, subject, node) {
         if(triple.predicate.toNT() === "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>") {
             sko.log(" found resource class "+triple.object.toNT());
             that.classes[triple.object.toNT()] = true;
-        };
+        }
 
         if(triple.object.interfaceName === 'NamedNode') {
             that.valuesMap[triple.predicate.toNT()] = triple.object.toNT();
@@ -3278,23 +3275,23 @@ sko.Resource.prototype.tryProperty = function(property)  {
         var observerFn = function(newValue){
             that.notifyPropertyChange(property,newValue);
         };
-        var subscription = this[property].subscribe(observerFn)
+        var subscription = this[property].subscribe(observerFn);
         this.subscriptions.push(subscription);
         return this[property];
     }
 };
 
-sko.Resource.prototype.prop = function(property)  {
-    return this.tryProperty(property) ;
-} 
+sko.Resource.prototype.prop = function (property) {
+    return this.tryProperty(property);
+};
 
-sko.Resource.prototype.getProp = function(property)  {
-    return this.tryProperty(property)() ;
-} 
+sko.Resource.prototype.getProp = function (property) {
+    return this.tryProperty(property)();
+};
 
-sko.Resource.prototype.setProp = function(property, newValue)  {
-    return this.tryProperty(property)(newValue) ;
-} 
+sko.Resource.prototype.setProp = function (property, newValue) {
+    return this.tryProperty(property)(newValue);
+};
 
 
 /**
@@ -3343,9 +3340,9 @@ sko.Resource.prototype.notifyPropertyChange = function(property, newValue) {
     }
 };
 
-sko.isSKOBlankNode = function(term) {
+sko.isSKOBlankNode = function (term) {
     return term.indexOf("_:sko") === 0;
-}
+};
 
 sko.Resource.prototype.disconnect = function() {
     sko.log(" ** DISCONNECTING");
@@ -3363,23 +3360,23 @@ sko.Resource.prototype.disconnect = function() {
     delete sko.about[this.resourceId];
 };
 
-sko.cleanNode = function(node) {
+sko.cleanNode = function (node) {
     sko.log("*** CLEANING!");
     sko.log(node);
     var thisId = jQuery(node).attr("aboutId");
     var ids = [];
-    if(thisId != null) {
+    if (thisId != null) {
         ids.push(thisId);
     }
     ids = ids.concat(sko.childrenResourceIds(node));
-    for(var i=0; i<ids.length; i++) {
-        if(sko.aboutResourceMap[ids[i]] != null) {
-            sko.log("*** DISCONNECTING "+ids[i]);
+    for (var i = 0; i < ids.length; i++) {
+        if (sko.aboutResourceMap[ids[i]] != null) {
+            sko.log("*** DISCONNECTING " + ids[i]);
             sko.log(sko.aboutResourceMap[ids[i]]);
             sko.aboutResourceMap[ids[i]].disconnect();
         }
     }
-}
+};
 
 sko.Resource.koObserver = function(skoResource) {
     var that = this;
@@ -3398,7 +3395,6 @@ sko.Resource.koObserver = function(skoResource) {
 
 sko.Resource.storeObserver = function(skoResource) {
     return function(node)  {
-try {
         sko.log("*** received notification change from STORE in resource "+skoResource.about());
         if(skoResource.about().indexOf("_:sko")===0) {
             return;
@@ -3522,6 +3518,7 @@ try {
 
         // updateValues
         skoResource.valuesMap = newValueMap;
+
         for(var i=0; i<toNullify.length; i++) {
             sko.log("*** setting value to null "+toNullify[i]+" -> NULL");
             skoResource[toNullify[i]](null);
@@ -3546,12 +3543,6 @@ try {
         sko.Class.check(skoResource);
 
         sko.log("*** END MODIFICATION");
-} catch (x) {
-    console.log("ERROR UPDATE!!!!!!!");
-    console.log(x);
-    console.log(x.message);
-    console.log(x.stack);
-}
     };    
 };
 
@@ -3588,14 +3579,14 @@ sko.traceResources = function(rootNode, model, cb) {
     var childNodes = jQuery(rootNode).find("*[about], *[data-bind]").toArray();
     nodes = nodes.concat(childNodes);
     var registerFn = function(k,env){
-        node = nodes[env._i];
+        var node = nodes[env._i];
         var about = jQuery(node).attr("about");
         var aboutId = jQuery(node).attr("aboutId");
         if(aboutId == null) {
             var databind;
 
             if(about == null) {
-                dataBind = jQuery(node).attr("data-bind");
+                var dataBind = jQuery(node).attr("data-bind");
                 if(dataBind != null) {
                     if(dataBind.indexOf("about:") != -1) {
                         var re = new RegExp("\s*([^ ]+)\s*,?");
@@ -3702,12 +3693,12 @@ sko.traceRelations = function(rootNode, model, cb) {
     sko.log(nodes);
 
     var registerFn = function(k,env){
-        node = nodes[env._i];
+        var node = nodes[env._i];
         var rel = jQuery(node).attr("rel");
         var databind;
 
         if(rel == null) {
-            dataBind = jQuery(node).attr("data-bind");
+            var dataBind = jQuery(node).attr("data-bind");
             if(dataBind != null) {
                 if(dataBind.indexOf("rel:") != -1) {
                     var re = new RegExp("\s*([^ ]+)\s*,?");
@@ -3752,30 +3743,30 @@ sko.traceRelations = function(rootNode, model, cb) {
 sko.generatorId = 0;
 sko.generatorsMap = {};
 
-sko.where = function(query) {
-    query = "select ?subject where "+query;
-    var nextId = ''+sko.generatorId;
+sko.where = function (query) {
+    query = "select ?subject where " + query;
+    var nextId = '' + sko.generatorId;
     sko.generatorId++;
 
     sko.generatorsMap[nextId] = ko.observable([]);
 
-    sko.log("*** WHERE QUERY: " +query);
-    sko.store.startObservingQuery(query, function(bindingsList){
+    sko.log("*** WHERE QUERY: " + query);
+    sko.store.startObservingQuery(query, function (bindingsList) {
         var acum = [];
         sko.log(" ** RESULTS!!!");
 
-        for(var i=0; i<bindingsList.length; i++) {
-            sko.log(" ** ADDING VALUE "+ bindingsList[i].subject.value);
-            acum.push("<"+bindingsList[i].subject.value+">");
+        for (var i = 0; i < bindingsList.length; i++) {
+            sko.log(" ** ADDING VALUE " + bindingsList[i].subject.value);
+            acum.push("<" + bindingsList[i].subject.value + ">");
         }
 
         sko.log("** SETTING VALUE");
-        sko.log(acum)
+        sko.log(acum);
         sko.generatorsMap[nextId](acum)
     });
 
     return sko.generatorsMap[nextId];
-}
+};
 
 /**
  * Applies bindings and RDF nodes to the DOM tree
@@ -3798,18 +3789,18 @@ sko.applyBindings = function(node, viewModel, cb) {
 /**
  * Retrieves the resource object active for a node
  */
-sko.resource = function(jqueryPath) {
+sko.resource = function (jqueryPath) {
     var nodes = jQuery(jqueryPath).toArray();
-    if(nodes.length === 1) {
+    if (nodes.length === 1) {
         return sko.currentResource(nodes[0]);
     } else {
         var acum = [];
-        for(var i=0; i<nodes.length; i++) {
+        for (var i = 0; i < nodes.length; i++) {
             acum.push(sko.currentResource(nodes[i]));
         }
         return acum;
     }
-}
+};
 
 // place holder for the parser
 sko.owl = {};
