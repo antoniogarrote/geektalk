@@ -10,16 +10,18 @@ Geektalk is built using a number of libraries we have developed to make the use 
 - [SemanticKO](https://github.com/antoniogarrote/semantic-ko)
 - [JSON-LD Macros](https://github.com/antoniogarrote/json-ld-macros)
 
-All this libraries are free software and can be cloned and modified from their Github repositories.
+All these libraries are free software and can be cloned and modified from their Github repositories.
 
 To use the application just get the code and open *index.html* in a (modern) browser.
 
 ## Build
 
-A ruby file named *build.rb* can be used to minify and join all the JS files in the application for a more convenient deployment.
-The files can also be included from the *src* directory in development. Check the comment at the *head* HTML at the top of *index.html*
+A ruby file named *build.rb* can be used to minify and join all the JS files in the application for a more convenient deployment. To execute this script, simply run:
 
     $ ruby ./build.rb
+	
+The files can also be included from the *src* directory in development. Check the comment in the *head* HTML tag at the top of *index.html*
+
 
 ## License
 

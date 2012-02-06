@@ -48,10 +48,11 @@
 </head>
 
 <body>
-<!-- github badge -->
+<!-- github badge 
 <a target="_blank" href="https://github.com/antoniogarrote/geektalk" data-bind="visible: appStatus()=='project-selection'">
   <img src="./images/forkme.png" style="z-index:1020;position:absolute;top:0;right:0;border:0;" width="149", height="149" alt="Fork me on Github"></img>
 </a>
+-->
 
 <!-- RDFStore frontend -->
 <div id="frontend-overlay"></div>
@@ -69,6 +70,9 @@
       <i class="icon-home" data-bind="visible: appStatus()!='project-selection'"></i>
       <a href="./index.html" data-bind="visible: appStatus()!='project-selection'">change project</a>
       <span class="separator" data-bind="visible: appStatus()!='project-selection', text: '|'"></span>
+      <i class="icon-download-alt"></i>
+      <a target="_blank" href="https://github.com/antoniogarrote/geektalk">source code</a>
+      <span class="separator">|</span>
       <i class="icon-question-sign"></i>
       <a href="#" data-bind="click: showAbout">about</a>
     </div>
