@@ -1,0 +1,9 @@
+require 'sinatra'
+require 'twitter'
+
+client = Twitter::REST::Client.new do |config|
+  config.consumer_key        = "yM8OaxiurswPhmr2Tnugvg"
+  config.consumer_secret     = "7CfdGlP8Nj672epm99fuboWbkDWXsYrBtLE1K5zFwVA"
+  config.access_token        = "YOUR_ACCESS_TOKEN"
+  config.access_token_secret = "YOUR_ACCESS_SECRET"
+end

@@ -73,7 +73,7 @@
 	},
 
 	// A StackOverflow user
-	"http://api.stackoverflow.com/1.1/users":
+	"https://api.stackexchange.com/2.2/users":
 
 	{
 	    '$':
@@ -93,7 +93,7 @@
 	},
 
 	// StackOverflow answers associated to users
-	"http://api.stackoverflow.com/1.1/users/*/answers":
+	"https://api.stackexchange.com/2.2/users/*/answers":
 	
 	{
 	    '$':
@@ -127,7 +127,7 @@
 	},
 
 	// StackOverflow questions
-	"http://api.stackoverflow.com/1.1/questions/*":
+	"https://api.stackexchange.com/2.2/questions/*":
 
 	{
 	    '$':
